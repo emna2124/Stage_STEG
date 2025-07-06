@@ -1,0 +1,45 @@
+.login-page {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #74ebd5, #acb6e5);
+  padding: 0;
+  margin: 0;
+}
+
+.card {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-outline-secondary {
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 16px;
+}
