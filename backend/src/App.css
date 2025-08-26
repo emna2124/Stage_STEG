@@ -1,0 +1,11 @@
+.app-wrapper {
+  width: 90%;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    width: 95%;
+    padding: 0 10px;
+  }
+}

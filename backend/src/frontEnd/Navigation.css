@@ -1,0 +1,266 @@
+/* ====== Container ====== */
+.navigation-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* ====== Main content ====== */
+.main-content {
+  flex: 1;
+  padding-top: 90px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ====== Navbar ====== */
+.custom-navbar {
+  background: #9ebbcc !important;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.8rem 1.5rem;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+}
+
+/* ====== Logo ====== */
+.logo {
+  display: flex;
+  align-items: center;
+  margin-right: 40px; /* ✅ espace entre logo et boutons */
+  padding-top: 4px;   /* ✅ descend un peu le logo */
+}
+
+.logo img {
+  width: 150px;
+  height: auto;
+  transition: transform 0.3s ease;
+  display: block;
+}
+.logo img:hover {
+  transform: scale(1.05);
+}
+
+
+/* ====== Menu Items ====== */
+.nav-item .btn-link {
+  color: #334155;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+}
+.nav-item .btn-link:hover {
+  background: #f1f5f9;
+}
+.nav-item .active {
+  color: #0A4D75 !important;
+  background: #e0edff;
+  font-weight: 600;
+}
+
+/* ====== User / Logout ====== */
+.btn-user {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: 0.3s;
+}
+.btn-user:hover {
+  background: #e2e8f0;
+}
+
+.btn-logout {
+  background: #ef4444;
+  color: white;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  border: none;
+  transition: 0.3s;
+}
+.btn-logout:hover {
+  background: #dc2626;
+}
+
+/* ====== Page d’accueil ====== */
+.content-welcome {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin: 2rem auto;
+  max-width: 700px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.content-welcome h1 {
+  font-size: 2rem;
+  color: #0f172a;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.content-welcome p {
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 75px;
+  }
+
+  .logo img {
+    width: 110px;
+  }
+
+  .nav-item .btn-link {
+    font-size: 0.9rem;
+  }
+}
+
+/* ====== RESPONSIVE NAVIGATION AGENT ====== */
+
+/* Pour les écrans moyens (tablettes) */
+@media (max-width: 992px) {
+  .custom-navbar .navbar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .custom-navbar .nav-item {
+    margin: 5px;
+  }
+}
+
+/* Pour les petits écrans (mobiles) */
+@media (max-width: 768px) {
+  .navigation-container {
+    padding-top: 70px;
+  }
+  
+  .custom-navbar {
+    padding: 0.5rem 1rem;
+  }
+  
+  .custom-navbar .container-fluid {
+    flex-wrap: nowrap;
+  }
+  
+  .logo {
+    margin-right: 15px;
+  }
+  
+  .logo img {
+    width: 120px;
+  }
+  
+  .navbar-toggler {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    margin-left: auto;
+  }
+  
+  .navbar-collapse {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: #9ebbcc;
+    z-index: 1000;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+  
+  .navbar-nav {
+    flex-direction: column !important;
+    width: 100%;
+  }
+  
+  .nav-item {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .nav-item .btn-link {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 15px;
+  }
+  
+  .navbar-collapse .d-flex {
+    flex-direction: column;
+    width: 100%;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .btn-user, .btn-logout {
+    width: 100%;
+    justify-content: center;
+    margin: 5px 0;
+  }
+  
+  .btn-user span, .btn-logout span {
+    display: inline;
+  }
+  
+  .main-content {
+    padding-top: 20px;
+  }
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 576px) {
+  .logo img {
+    width: 100px;
+  }
+  
+  .navbar-toggler {
+    font-size: 0.9rem;
+  }
+  
+  .nav-item .btn-link {
+    font-size: 0.9rem;
+  }
+  
+  .btn-user, .btn-logout {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+  
+  .content-welcome {
+    padding: 1.2rem;
+    margin: 0.8rem;
+  }
+}
+
+/* Amélioration de l'accessibilité */
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 2px rgba(10, 77, 117, 0.5);
+}
+
+/* Animation pour le menu mobile */
+.navbar-collapse {
+  transition: all 0.3s ease;
+}

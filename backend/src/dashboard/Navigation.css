@@ -1,0 +1,265 @@
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #1170B0, #0A4D75);
+  color: white;
+  padding: 20px;
+  position: fixed;
+  height: 100%;
+  top: 0;
+  left: 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.logo img {
+  width: 200px;
+  height: 50px;
+}
+
+.logo h2 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 18px;
+  text-decoration: none;
+  margin-bottom: 20px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.user-profile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+  flex-grow: 1;
+}
+
+.sidebar button {
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar button.active {
+  background: rgba(255, 255, 255, 0.25);
+  font-weight: bold;
+}
+
+.logout-button {
+  background-color: #e74c3c !important;
+  margin-top: 30px;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.logout-button:hover {
+  background-color: #c0392b !important;
+}
+
+.content {
+  margin-left: 250px;
+  padding: 20px;
+  flex-grow: 1;
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+
+/* Pour les écrans moyens (tablettes) */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 200px;
+  }
+  
+  .content {
+    margin-left: 200px;
+  }
+  
+  .logo img {
+    width: 120px;
+  }
+}
+
+/* Pour les petits écrans (mobiles) */
+@media (max-width: 768px) {
+  /* Navigation sidebar devient un menu hamburger */
+  .sidebar {
+    width: 60px;
+    padding: 15px 10px;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .sidebar .logo h2,
+  .sidebar .user-profile span,
+  .sidebar button span {
+    display: none;
+  }
+  
+  .sidebar .logo {
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    align-items: center;
+  }
+  
+  .sidebar button {
+    justify-content: center;
+    padding: 15px 5px;
+  }
+  
+  .sidebar button svg {
+    margin-right: 0;
+    font-size: 20px;
+  }
+  
+  .content {
+    margin-left: 60px;
+    padding: 15px;
+  }
+  
+  /* Navigation bar */
+  .custom-navbar {
+    padding: 0.5rem 1rem;
+  }
+  
+  .navbar-collapse {
+    background: #9ebbcc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo img {
+    width: 100px;
+  }
+  
+  .btn-user span,
+  .btn-logout span {
+    display: none;
+  }
+  
+  .btn-user,
+  .btn-logout {
+    padding: 8px;
+  }
+  
+  .btn-user svg,
+  .btn-logout svg {
+    margin-right: 0;
+    font-size: 18px;
+  }
+  
+  .main-content {
+    padding-top: 70px;
+  }
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 576px) {
+  .sidebar {
+    width: 50px;
+    padding: 10px 5px;
+  }
+  
+  .content {
+    margin-left: 50px;
+    padding: 10px;
+  }
+  
+  .sidebar button {
+    padding: 12px 5px;
+  }
+  
+  .content-welcome {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .content-welcome h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Menu hamburger pour la sidebar en version mobile */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1001;
+  background: #0A4D75;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .content {
+    margin-left: 0;
+  }
+}
+
+/* Amélioration de l'accessibilité */
+button:focus {
+  outline: 2px solid #0A4D75;
+  outline-offset: 2px;
+}
+
+/* Animation pour les transitions */
+.sidebar,
+.content,
+.navbar-collapse {
+  transition: all 0.3s ease;
+}

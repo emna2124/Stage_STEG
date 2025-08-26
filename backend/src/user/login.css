@@ -1,0 +1,63 @@
+body, #root, .forgetpass-container {
+  all: unset !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+  background: #f5f7fa !important;
+  width: 100%;
+max-width: 400px;
+
+}
+
+
+/* Styles pour les cases à cocher */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0b6bae;
+  margin-right: 8px;
+}
+
+/* Ajustements pour l'alignement des éléments */
+.d-flex {
+  display: flex;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.me-1 {
+  margin-right: 0.25rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+/* Styles pour les liens dans les formulaires */
+.forgetpass-form a.login-link {
+  color: #0b6bae;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgetpass-form a.login-link:hover {
+  color: #42a3e9;
+  text-decoration: underline;
+}
+
