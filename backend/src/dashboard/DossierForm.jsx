@@ -63,9 +63,7 @@ const DossierForm = () => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     
     setIsSubmitting(true);
 
@@ -97,7 +95,10 @@ const DossierForm = () => {
         text: "Dossier créé avec succès ! Redirection en cours...", 
         type: "success" 
       });
-      setTimeout(() => navigate("/agentDashboard"), 2000);
+
+      // Redirection vers la page précédente
+      setTimeout(() => navigate(-1), 2000);
+
     } catch (error) {
       setMessage({ 
         text: error.message, 
@@ -133,9 +134,7 @@ const DossierForm = () => {
 
         <form onSubmit={handleSubmit} className="dossier-form">
           <div className="form-group">
-            <label htmlFor="objet">
-              Objet du dossier *
-            </label>
+            <label htmlFor="objet">Objet du dossier *</label>
             <input
               type="text"
               id="objet"
@@ -149,9 +148,7 @@ const DossierForm = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="service_concerne">
-              Service concerné *
-            </label>
+            <label htmlFor="service_concerne">Service concerné *</label>
             <input
               type="text"
               id="service_concerne"
@@ -165,9 +162,7 @@ const DossierForm = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="demandeur">
-              Demandeur *
-            </label>
+            <label htmlFor="demandeur">Demandeur *</label>
             <input
               type="text"
               id="demandeur"
