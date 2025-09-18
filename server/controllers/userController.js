@@ -7,9 +7,9 @@ const transporter = require('../config/nodemailer');
 const { EMAIL_USER, ACCESS_TOKEN_SECRET } = process.env;
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { nom, prenom, email, password, matricule } = req.body;
+  const { nom, prenom, email, password, matricule, uniteFonctionnelle } = req.body;
 
-  if (!nom || !prenom || !email || !password || !matricule) {
+  if (!nom || !prenom || !email || !password || !matricule || !uniteFonctionnelle) {
     res.status(400);
     throw new Error("Tous les champs sont obligatoires");
   }
@@ -29,6 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     prenom, 
     email,
     matricule,
+    uniteFonctionnelle,
     password: hashedPassword,
     verificationCode,
     verificationCodeExpires,
@@ -96,6 +97,7 @@ const verifyCode = asyncHandler(async (req, res) => {
       id: user._id,
       nom: user.nom,
       email: user.email,
+      uniteFonctionnelle: user.uniteFonctionnelle,
       isApproved: user.isApproved
     }
   });
@@ -136,7 +138,8 @@ const loginUser = asyncHandler(async (req, res) => {
       email: user.email,
       matricule: user.matricule,
       nom: user.nom,
-      prenom: user.prenom
+      prenom: user.prenom,
+      uniteFonctionnelle: user.uniteFonctionnelle
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "1d" }
@@ -151,6 +154,7 @@ const loginUser = asyncHandler(async (req, res) => {
       prenom: user.prenom,
       email: user.email,
       matricule: user.matricule,
+      uniteFonctionnelle: user.uniteFonctionnelle,
       role: user.role,
     }
   });
@@ -213,7 +217,6 @@ const getUserById = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
-
 const afficherUser = asyncHandler(async (req, res) => {
   try {
     const users = await User.find({}, "-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordExpires");
@@ -255,6 +258,7 @@ const affecterRole = asyncHandler(async (req, res) => {
         prenom: user.prenom,
         email: user.email,
         matricule: user.matricule,
+        uniteFonctionnelle: user.uniteFonctionnelle,
         role: user.role,
         isApproved: user.isApproved
       },

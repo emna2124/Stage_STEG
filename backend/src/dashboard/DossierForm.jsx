@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 import { FaFolderOpen, FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 import './DossierForm.css';
 
@@ -13,15 +15,47 @@ const DossierForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [errors, setErrors] = useState({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
   const token = localStorage.getItem('token');
 
+  const serviceOptions = [
+    { value: "", label: "Sélectionnez un service" },
+    { value: "T210", label: "T210" },
+    { value: "T211", label: "T211" },
+    { value: "T212", label: "T212" },
+    { value: "T213", label: "T213" }
+  ];
+
   useEffect(() => {
     if (!userInfo || !token) {
-      navigate('/');
+      console.log('No userInfo or token, redirecting to login');
+      navigate('/login');
+    } else {
+      try {
+        const decoded = jwtDecode(token); // Use jwtDecode
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          console.log('Token expired, clearing localStorage');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userInfo');
+          navigate('/login');
+        } else if (!isInitialized) {
+          setFormData(prev => ({
+            ...prev,
+            demandeur: userInfo.matricule || ""
+          }));
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error('Invalid token:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+        navigate('/login');
+      }
     }
-  }, [navigate, userInfo, token]);
+  }, [navigate, userInfo, token, isInitialized]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -72,36 +106,38 @@ const DossierForm = () => {
         throw new Error("Utilisateur non connecté ou matricule manquant");
       }
 
+      if (!userInfo.uniteFonctionnelle) {
+        throw new Error("Unité fonctionnelle manquante pour l'utilisateur");
+      }
+
       const dossierData = {
-        ...formData,
-        userMatricule: userInfo.matricule
+        objet: formData.objet,
+        service_concerne: formData.service_concerne,
+        demandeur: formData.demandeur,
+        userMatricule: userInfo.matricule,
+        uniteFonctionnelle: userInfo.uniteFonctionnelle
       };
 
-      const response = await fetch("http://localhost:3001/api/dossiers", {
-        method: "POST",
+      console.log('Données envoyées au serveur:', dossierData);
+      console.log('Authorization header:', `Bearer ${token}`);
+
+      const response = await axios.post("http://localhost:3001/api/dossiers", dossierData, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(dossierData),
+        }
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de la création du dossier");
-      }
 
       setMessage({ 
         text: "Dossier créé avec succès ! Redirection en cours...", 
         type: "success" 
       });
 
-      // Redirection vers la page précédente
       setTimeout(() => navigate(-1), 2000);
-
     } catch (error) {
+      console.error("Erreur détaillée:", error.response?.data || error);
       setMessage({ 
-        text: error.message, 
+        text: error.response?.data?.message || error.message, 
         type: "error" 
       });
     } finally {
@@ -149,15 +185,19 @@ const DossierForm = () => {
 
           <div className="form-group">
             <label htmlFor="service_concerne">Service concerné *</label>
-            <input
-              type="text"
+            <select
               id="service_concerne"
               name="service_concerne"
-              placeholder="Service concerné"
               value={formData.service_concerne}
               onChange={handleChange}
               className={errors.service_concerne ? 'error' : ''}
-            />
+            >
+              {serviceOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             {errors.service_concerne && <span className="error-text">{errors.service_concerne}</span>}
           </div>
 
@@ -170,9 +210,9 @@ const DossierForm = () => {
               placeholder="Demandeur"
               value={formData.demandeur}
               onChange={handleChange}
-              className={errors.demandeur ? 'error' : ''}
+              readOnly
+              className="read-only-input"
             />
-            {errors.demandeur && <span className="error-text">{errors.demandeur}</span>}
           </div>
 
           <button 

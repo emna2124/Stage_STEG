@@ -1,37 +1,40 @@
+// controllers/dossierController.js
 const asyncHandler = require('express-async-handler');
 const Dossier = require('../models/dossierModel');
 
 const getDossiers = asyncHandler(async (req, res) => {
-  const { matricule } = req.query;
+  const { uniteFonctionnelle } = req.query;
   
-  if (!matricule) {
-    return res.status(400).json({ message: "Matricule utilisateur requis" });
+  if (!uniteFonctionnelle) {
+    return res.status(400).json({ message: "Unité fonctionnelle requise" });
   }
 
-  const dossiers = await Dossier.find({ userMatricule: matricule })
+  const dossiers = await Dossier.find({ uniteFonctionnelle: uniteFonctionnelle })
     .populate('createur', 'nom prenom email');
   
   res.status(200).json(dossiers);
 });
 
 const createDossier = asyncHandler(async (req, res) => {
-  const { objet, service_concerne, demandeur, userMatricule } = req.body;
+  const { objet, service_concerne, demandeur } = req.body;
 
-  if (!objet || !service_concerne || !demandeur || !userMatricule) {
+  if (!objet || !service_concerne || !demandeur) {
     res.status(400);
     throw new Error("Tous les champs obligatoires doivent être remplis");
   }
 
-  if (userMatricule !== req.user.matricule) {
-    res.status(403);
-    throw new Error("Non autorisé : matricule non valide");
+  // Vérifier que l'utilisateur a une unité fonctionnelle
+  if (!req.user.uniteFonctionnelle) {
+    res.status(400);
+    throw new Error("Unité fonctionnelle manquante pour l'utilisateur");
   }
 
   const dossier = await Dossier.create({
     objet,
     service_concerne,
     demandeur,
-    userMatricule,
+    userMatricule: req.user.matricule,
+    uniteFonctionnelle: req.user.uniteFonctionnelle,
     _user: req.user._id,
     createur: req.user._id,
     historique: [{
@@ -54,9 +57,9 @@ const getDossierById = asyncHandler(async (req, res) => {
     throw new Error("Dossier non trouvé");
   }
 
-  if (dossier.userMatricule !== req.user.matricule && !req.user.role.includes('Admin')) {
+  if (dossier.uniteFonctionnelle !== req.user.uniteFonctionnelle && !req.user.role.includes('Admin')) {
     res.status(403);
-    throw new Error("Non autorisé : vous n'êtes ni le propriétaire ni un administrateur");
+    throw new Error("Non autorisé : vous n'êtes pas membre de cette unité fonctionnelle");
   }
   
   const dossierWithFormattedDates = { ...dossier._doc };
@@ -77,9 +80,9 @@ const updateDossier = asyncHandler(async (req, res) => {
     throw new Error("Dossier non trouvé");
   }
 
-  if (dossier.userMatricule !== req.user.matricule && !req.user.role.includes('Admin')) {
+  if (dossier.uniteFonctionnelle !== req.user.uniteFonctionnelle && !req.user.role.includes('Admin')) {
     res.status(403);
-    throw new Error("Non autorisé : vous n'êtes ni le propriétaire ni un administrateur");
+    throw new Error("Non autorisé : vous n'êtes pas membre de cette unité fonctionnelle");
   }
 
   const updatableFields = [
@@ -147,7 +150,7 @@ const updateDossier = asyncHandler(async (req, res) => {
 
 const getDossierHistory = asyncHandler(async (req, res) => {
   const dossier = await Dossier.findById(req.params.id)
-    .select('objet reference historique')
+    .select('objet reference historique uniteFonctionnelle')
     .populate('historique.utilisateur', 'nom prenom email');
 
   if (!dossier) {
@@ -155,10 +158,10 @@ const getDossierHistory = asyncHandler(async (req, res) => {
     throw new Error("Dossier non trouvé");
   }
 
-  /*if (dossier.userMatricule !== req.user.matricule && !req.user.role.includes('Admin')) {
+  if (dossier.uniteFonctionnelle !== req.user.uniteFonctionnelle && !req.user.role.includes('Admin')) {
     res.status(403);
-    throw new Error("Non autorisé : vous n'êtes ni le propriétaire ni un administrateur");
-  }*/
+    throw new Error("Non autorisé : vous n'êtes pas membre de cette unité fonctionnelle");
+  }
 
   res.status(200).json(dossier.historique);
 });

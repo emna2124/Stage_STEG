@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode'; // Use named import
 import { FaHistory } from 'react-icons/fa';
 import "./DossierList.css";
 
@@ -13,19 +15,30 @@ const DossierList = () => {
   const [expandedDossier, setExpandedDossier] = useState(null);
   const navigate = useNavigate();
 
-  // Récupérer les informations correctement
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
   const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchDossiers = async () => {
       try {
-        if (!token || !userInfo?.matricule) {
+        if (!token || !userInfo?.uniteFonctionnelle) {
           throw new Error("Vous devez être connecté");
         }
 
-        const response = await fetch(
-          `http://localhost:3001/api/dossiers?matricule=${userInfo.matricule}`,
+        const decoded = jwtDecode(token); // Use jwtDecode
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          console.log('Token expired, clearing localStorage');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userInfo');
+          navigate('/login');
+          return;
+        }
+
+        console.log('Authorization header:', `Bearer ${token}`);
+
+        const response = await axios.get(
+          `http://localhost:3001/api/dossiers?uniteFonctionnelle=${userInfo.uniteFonctionnelle}`,
           {
             headers: {
               "Authorization": `Bearer ${token}`
@@ -33,22 +46,17 @@ const DossierList = () => {
           }
         );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Erreur serveur");
-        }
-
-        const data = await response.json();
-        setDossiers(data);
+        setDossiers(response.data);
       } catch (error) {
-        setMessage(`❌ ${error.message}`);
+        setMessage(`❌ ${error.response?.data?.message || error.message}`);
+        console.error('Erreur lors de la récupération des dossiers:', error.response?.data || error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchDossiers();
-  }, [token, userInfo?.matricule]);
+  }, [token, userInfo?.uniteFonctionnelle, navigate]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -95,7 +103,7 @@ const DossierList = () => {
   return (
     <div className="dossier-container">
       <div className="dossier-header">
-        <h2>Gestion des Dossiers</h2>
+        <h2>Gestion des Dossiers - Unité: {userInfo.uniteFonctionnelle}</h2>
         <button className="btn-add" onClick={() => navigate("/dossiers/new")}>
           + Nouveau Dossier
         </button>
@@ -180,6 +188,7 @@ const DossierList = () => {
                               <p><strong>Référence:</strong> {d.reference || "-"}</p>
                               <p><strong>Service concerné:</strong> {d.service_concerne}</p>
                               <p><strong>Demandeur:</strong> {d.demandeur}</p>
+                              <p><strong>Unité fonctionnelle:</strong> {d.uniteFonctionnelle}</p>
                               <p><strong>Statut:</strong> <span className={`status-badge status-${d.status.toLowerCase().replace(' ', '-')}`}>{d.status}</span></p>
                             </div>
 

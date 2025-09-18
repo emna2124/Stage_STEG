@@ -1,3 +1,4 @@
+// models/dossierModel.js
 const mongoose = require('mongoose');
 
 const dossierSchema = new mongoose.Schema({
@@ -14,6 +15,10 @@ const dossierSchema = new mongoose.Schema({
     required: true
   },
   userMatricule: {
+    type: String,
+    required: true
+  },
+  uniteFonctionnelle: {
     type: String,
     required: true
   },

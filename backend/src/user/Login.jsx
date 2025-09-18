@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./login.css";
-
 import logo from "../assets/logoS.png";
 
 function Login() {
@@ -23,6 +22,8 @@ function Login() {
         password,
       });
 
+      console.log('Login response:', response.data); // Debug
+
       if (response.data.requiresVerification) {
         localStorage.setItem("pendingEmail", response.data.email);
         navigate("/codeAuth");
@@ -31,15 +32,17 @@ function Login() {
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
-        // Stocker les informations utilisateur séparément pour un accès facile
         localStorage.setItem("userInfo", JSON.stringify({
-          id: response.data.user.id,
+          _id: response.data.user._id, // Use _id
           nom: response.data.user.nom,
           prenom: response.data.user.prenom,
           email: response.data.user.email,
           matricule: response.data.user.matricule,
+          uniteFonctionnelle: response.data.user.uniteFonctionnelle,
           role: response.data.user.role
         }));
+
+        console.log('Stored userInfo:', JSON.parse(localStorage.getItem('userInfo'))); // Debug
 
         if (response.data.user.role === "Admin") {
           navigate("/dashboard");
@@ -49,7 +52,7 @@ function Login() {
       }
     } catch (err) {
       setError(err.response?.data?.message || "Email ou mot de passe incorrect");
-      console.error("Erreur lors de la connexion :", err);
+      console.error("Erreur lors de la connexion :", err.response?.data || err);
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +105,7 @@ function Login() {
           </div>
 
           <div className="input-group d-flex justify-content-between align-items-center">
-            <label className="input-label" style={{margin: 0}}>
+            <label className="input-label" style={{ margin: 0 }}>
               <input type="checkbox" className="me-1" />
               Se souvenir de moi
             </label>

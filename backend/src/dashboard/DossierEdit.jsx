@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { FaSave, FaArrowLeft, FaCalendarAlt, FaMoneyBillWave, FaFileAlt, FaFolderOpen, FaPlus, FaTrash } from 'react-icons/fa';
 import './UpdateDossier.css';
 
@@ -32,6 +33,27 @@ const DossierEdit = () => {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [activeSection, setActiveSection] = useState("informations");
 
+  const userInfo = useMemo(() => {
+    try {
+      const info = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      console.log('Parsed userInfo:', info);
+      return info;
+    } catch (e) {
+      console.error('Erreur lors du parsing de userInfo:', e);
+      return {};
+    }
+  }, []);
+
+  const token = localStorage.getItem('token');
+
+  const serviceOptions = [
+    { value: "", label: "Sélectionnez un service" },
+    { value: "T210", label: "T210" },
+    { value: "T211", label: "T211" },
+    { value: "T212", label: "T212" },
+    { value: "T213", label: "T213" }
+  ];
+
   const statusOptions = [
     "En cours",
     "Validé",
@@ -41,21 +63,40 @@ const DossierEdit = () => {
   ];
 
   useEffect(() => {
+    console.log('useEffect exécuté. userInfo:', userInfo, 'token:', !!token);
+    if (!userInfo.email || !token) {
+      console.log('Manque userInfo.email ou token, redirection vers login');
+      setMessage({ text: "Vous devez être connecté", type: "error" });
+      navigate('/login');
+      return;
+    }
+
+    let isMounted = true;
+
     const fetchDossier = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Vous devez être connecté");
-        }
-
+        console.log('Récupération du dossier ID:', id);
         const response = await fetch(`http://localhost:3001/api/dossiers/${id}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
         });
         const data = await response.json();
+        console.log('Données du dossier:', data);
+
+        if (!isMounted) return;
 
         if (response.ok) {
+          const validService = data.service_concerne && serviceOptions.some(option => option.value === data.service_concerne)
+            ? data.service_concerne
+            : userInfo.uniteFonctionnelle || "";
+          
+          // Utiliser userMatricule s'il existe, sinon utiliser userInfo.matricule
+          const demandeurValue = data.userMatricule || userInfo.matricule || "";
+          
+          console.log('Service sélectionné:', validService);
+          console.log('Demandeur utilisé:', demandeurValue);
+          
           const formattedData = {
             ...data,
             date_demande_achat: data.date_demande_achat ? new Date(data.date_demande_achat).toISOString().split('T')[0] : "",
@@ -65,54 +106,96 @@ const DossierEdit = () => {
             date_depouillement: data.date_depouillement ? new Date(data.date_depouillement).toISOString().split('T')[0] : "",
             date_bon_commande: data.date_bon_commande ? new Date(data.date_bon_commande).toISOString().split('T')[0] : "",
             date_livraison: data.date_livraison ? new Date(data.date_livraison).toISOString().split('T')[0] : "",
-            etapes: data.etapes || []
+            etapes: data.etapes || [],
+            service_concerne: validService,
+            demandeur: demandeurValue // Utiliser userMatricule du dossier ou userInfo.matricule
           };
+          console.log('formData mis à jour:', formattedData);
           setFormData(formattedData);
         } else {
           throw new Error(data.message || "Dossier non trouvé ou accès non autorisé");
         }
       } catch (error) {
-        console.error("Erreur lors du chargement du dossier:", error);
-        setMessage({ text: error.message, type: "error" });
+        if (isMounted) {
+          console.error("Erreur lors du chargement du dossier:", error);
+          setMessage({ text: error.message, type: "error" });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    fetchDossier();
-  }, [id]);
+    try {
+      console.log('Décodage du token...');
+      const decoded = jwtDecode(token);
+      console.log('Token décodé:', decoded);
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        console.log('Token expiré, suppression de localStorage');
+        setMessage({ text: "Session expirée, veuillez vous reconnecter", type: "error" });
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+        navigate('/login');
+        return;
+      }
+      fetchDossier();
+    } catch (error) {
+      console.error('Token invalide:', error);
+      setMessage({ text: "Token invalide, veuillez vous reconnecter", type: "error" });
+      localStorage.removeItem('token');
+      localStorage.removeItem('userInfo');
+      navigate('/login');
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, navigate, token, userInfo.email, userInfo.uniteFonctionnelle, userInfo.matricule]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    console.log(`Modification de ${name} à ${value}`);
+    setFormData(prev => {
+      const updatedData = {
+        ...prev,
+        [name]: value
+      };
+      console.log('formData après modification:', updatedData);
+      return updatedData;
+    });
   };
 
   const handleAddEtape = () => {
     if (newEtape.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        etapes: [...prev.etapes, newEtape.trim()]
-      }));
+      setFormData(prev => {
+        const updatedData = {
+          ...prev,
+          etapes: [...prev.etapes, newEtape.trim()]
+        };
+        console.log('formData après ajout étape:', updatedData);
+        return updatedData;
+      });
       setNewEtape("");
     }
   };
 
   const handleRemoveEtape = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      etapes: prev.etapes.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => {
+      const updatedData = {
+        ...prev,
+        etapes: prev.etapes.filter((_, i) => i !== index)
+      };
+      console.log('formData après suppression étape:', updatedData);
+      return updatedData;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
+    console.log('Soumission du formulaire:', formData);
 
     try {
-      const token = localStorage.getItem('token');
       if (!token) {
         throw new Error("Vous devez être connecté");
       }
@@ -131,6 +214,7 @@ const DossierEdit = () => {
       });
 
       const data = await response.json();
+      console.log('Réponse mise à jour:', data);
 
       if (response.ok) {
         setMessage({ 
@@ -236,16 +320,20 @@ const DossierEdit = () => {
                   <label htmlFor="service_concerne">
                     <FaFolderOpen className="input-icon" /> Service concerné *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="service_concerne"
                     name="service_concerne"
-                    placeholder="Service concerné"
                     value={formData.service_concerne}
                     onChange={handleChange}
                     required
-                    className="modern-input"
-                  />
+                    className="modern-select"
+                  >
+                    {serviceOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label htmlFor="demandeur">
@@ -257,9 +345,8 @@ const DossierEdit = () => {
                     name="demandeur"
                     placeholder="Demandeur"
                     value={formData.demandeur}
-                    onChange={handleChange}
-                    required
-                    className="modern-input"
+                    readOnly
+                    className="modern-input read-only-input"
                   />
                 </div>
                 <div className="form-group">

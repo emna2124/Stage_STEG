@@ -8,10 +8,12 @@ const verifyToken = asyncHandler(async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
+      
+      console.log('Received token:', token); // Debug
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      console.log('Decoded token:', decoded); // Debug
 
-      // Fetch user from database to include matricule
-      const user = await User.findById(decoded._id).select('-password');
+      const user = await User.findById(decoded._id).select('-password'); // Use _id
       if (!user) {
         res.status(401);
         throw new Error('Utilisateur non trouvé');
@@ -23,7 +25,8 @@ const verifyToken = asyncHandler(async (req, res, next) => {
         role: user.role,
         matricule: user.matricule,
         nom: user.nom,
-        prenom: user.prenom
+        prenom: user.prenom,
+        uniteFonctionnelle: user.uniteFonctionnelle
       };
 
       next();

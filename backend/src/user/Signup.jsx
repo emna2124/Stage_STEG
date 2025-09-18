@@ -10,6 +10,7 @@ function Signup() {
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [matricule, setMatricule] = useState("");
+  const [uniteFonctionnelle, setUniteFonctionnelle] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,7 @@ function Signup() {
         prenom,
         email,
         matricule,
+        uniteFonctionnelle,
         password,
       });
 
@@ -101,6 +103,20 @@ function Signup() {
               placeholder="Entrez votre matricule"
               value={matricule}
               onChange={(e) => setMatricule(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">
+              Unité Fonctionnelle
+            </label>
+            <input
+              type="text"
+              className="email-input"
+              placeholder="Entrez votre unité fonctionnelle"
+              value={uniteFonctionnelle}
+              onChange={(e) => setUniteFonctionnelle(e.target.value)}
               required
             />
           </div>
